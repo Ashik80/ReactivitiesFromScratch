@@ -15,7 +15,7 @@ import { combineDateAndTime } from '../../../app/common/util/util'
 import { combineValidators, isRequired, composeValidators, hasLengthGreaterThan } from 'revalidate'
 
 const validate = combineValidators({
-    title: isRequired({ message: 'Title is required' }),
+    title: isRequired('Title'),
     category: isRequired('Category'),
     description: composeValidators(
         isRequired('Description'),
@@ -68,15 +68,15 @@ const ActivityForm: React.FC<RouteComponentProps<DetailsParam>> = ({ match, hist
                 <Segment clearing>
                     <FinalForm validate={validate} initialValues={activity} onSubmit={handleFinalFormSubmit} render={({ handleSubmit, invalid, pristine }) => (
                         <Form onSubmit={handleSubmit} loading={loading}>
-                            <Field component={TextInput} name="title" placeholder="Title" value={activity.title} />
-                            <Field component={TextAreaInput} rows={3} placeholder="Description" name="description" value={activity.description} />
-                            <Field component={SelectInput} options={category} placeholder="Category" name="category" value={activity.category} />
+                            <Field component={TextInput} name="title" placeholder="Title" />
+                            <Field component={TextAreaInput} rows={3} placeholder="Description" name="description" />
+                            <Field component={SelectInput} options={category} placeholder="Category" name="category" />
                             <Form.Group widths='equal'>
-                                <Field component={DateInput} date={true} time={false} placeholder="Date" name="date" value={activity.date} />
-                                <Field component={DateInput} time={true} date={false} placeholder="Time" name="time" value={activity.date} />
+                                <Field component={DateInput} date={true} time={false} placeholder="Date" name="date" />
+                                <Field component={DateInput} time={true} date={false} placeholder="Time" name="time" />
                             </Form.Group>
-                            <Field component={TextInput} placeholder="City" name="city" value={activity.city} />
-                            <Field component={TextInput} placeholder="Venue" name="venue" value={activity.venue} />
+                            <Field component={TextInput} placeholder="City" name="city" />
+                            <Field component={TextInput} placeholder="Venue" name="venue" />
                             <Button loading={submitting} disabled={loading || invalid || pristine} positive content="Submit" type="submit" floated="right" />
                             <Button content="Cancel" disabled={loading} onClick={() => (activity.id) ? history.push(`/activities/${activity.id}`) : history.push('/activities')} floated="right" />
                         </Form>
