@@ -59,7 +59,7 @@ namespace Application.User
                         Image = null
                     };
                 }
-                throw new RestException(HttpStatusCode.BadRequest, new { user = "Wrond credentials" });
+                throw new RestException(HttpStatusCode.Unauthorized, new { user = "Wrond credentials" });
             }
         }
     }
