@@ -1,24 +1,28 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Segment, Item, Header, Image, Button } from 'semantic-ui-react'
 import { IActivity } from '../../../app/models/activity';
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { RootStoreContext } from '../../../app/stores/rootStore';
 
 const activityImageStyle = {
-  filter: 'brightness(30%)'
+    filter: 'brightness(30%)'
 };
 
 const activityImageTextStyle = {
-  position: 'absolute',
-  bottom: '5%',
-  left: '5%',
-  width: '100%',
-  height: 'auto',
-  color: 'white'
+    position: 'absolute',
+    bottom: '5%',
+    left: '5%',
+    width: '100%',
+    height: 'auto',
+    color: 'white'
 };
 
-const ActivityDetailedHeader: React.FC<{activity: IActivity}> = ({activity}) => {
+const ActivityDetailedHeader: React.FC<{ activity: IActivity }> = ({ activity }) => {
+    const rootStore = useContext(RootStoreContext)
+    const { attendActivity, cancelAttendence, loading } = rootStore.activityStore
+
     return (
         <Segment.Group>
             <Segment basic attached='top' style={{ padding: '0' }}>
@@ -42,11 +46,17 @@ const ActivityDetailedHeader: React.FC<{activity: IActivity}> = ({activity}) => 
                 </Segment>
             </Segment>
             <Segment clearing attached='bottom'>
-                <Button color='teal'>Join Activity</Button>
-                <Button>Cancel attendance</Button>
-                <Button color='orange' floated='right' as={Link} to={`/manage/${activity.id}`}>
-                    Manage Event
-                </Button>
+                {!activity.isHost && !activity.isGoing && (
+                    <Button loading={loading} color='teal' onClick={attendActivity} >Join Activity</Button>
+                )}
+                {!activity.isHost && activity.isGoing && (
+                    <Button loading={loading} onClick={cancelAttendence}>Cancel attendance</Button>
+                )}
+                {activity.isHost && (
+                    <Button color='orange' floated='right' as={Link} to={`/manage/${activity.id}`}>
+                        Manage Event
+                    </Button>
+                )}
             </Segment>
         </Segment.Group>
     )
