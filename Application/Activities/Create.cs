@@ -1,9 +1,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Persistence;
 
 namespace Application.Activities
@@ -37,8 +39,12 @@ namespace Application.Activities
         public class Handler : IRequestHandler<Command>
         {
             private readonly DataContext _context;
-            public Handler(DataContext context)
+            private readonly IUserAccessor userAccessor;
+            private readonly UserManager<AppUser> userManager;
+            public Handler(DataContext context, IUserAccessor userAccessor, UserManager<AppUser> userManager)
             {
+                this.userManager = userManager;
+                this.userAccessor = userAccessor;
                 _context = context;
             }
 
@@ -55,9 +61,22 @@ namespace Application.Activities
                     Venue = request.Venue
                 };
                 _context.Activities.Add(activity);
+
+                var user = await userManager.FindByNameAsync(userAccessor.GetCurrentUsername());
+
+                var attendee = new UserActivity
+                {
+                    AppUser = user,
+                    Activity = activity,
+                    DateJoined = DateTime.Now,
+                    IsHost = true
+                };
+
+                _context.UserActivities.Add(attendee);
+
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if(success) return Unit.Value;
+                if (success) return Unit.Value;
                 throw new Exception("Problem saving activity");
             }
         }
