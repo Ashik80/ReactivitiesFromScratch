@@ -1,14 +1,12 @@
-import { observable, action, computed, configure, runInAction } from 'mobx'
+import { observable, action, computed, runInAction } from 'mobx'
 import { SyntheticEvent } from 'react'
 import { IActivity } from '../models/activity'
 import agent from '../api/agent'
-import { format, addHours } from 'date-fns'
+import { format } from 'date-fns'
 import { history } from '../..'
 import { toast } from 'react-toastify'
 import { RootStore } from './rootStore'
 import { setActivityProps, createAttendee } from '../common/util/util'
-
-configure({ enforceActions: 'always' })
 
 export default class ActivityStore {
     rootStore: RootStore;
@@ -100,7 +98,6 @@ export default class ActivityStore {
             let attendees = []
             attendees.push(attendee)
             activity.attendees = attendees
-            activity.date = addHours(activity.date, 6)
             activity.isHost = true
             runInAction('Creating activity', () => {
                 this.activityRegistry.set(activity.id, activity)
@@ -120,7 +117,6 @@ export default class ActivityStore {
         this.submitting = true
         try {
             await agent.Activities.update(activity)
-            activity.date = addHours(activity.date, 6)
             runInAction('Editing activity', () => {
                 this.activityRegistry.set(activity.id, activity)
                 this.selectedActivity = activity

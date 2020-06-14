@@ -5,7 +5,6 @@ import { IActivity } from '../../../app/models/activity'
 import { observer } from 'mobx-react-lite'
 import { format } from 'date-fns'
 import ActivityListItemAttendees from './ActivityListItemAttendees'
-import { addHours } from 'date-fns/esm'
 
 interface IProps {
     activity: IActivity
@@ -19,11 +18,11 @@ const ActivityListItem: React.FC<IProps> = ({ activity }) => {
             <Segment>
                 <Item.Group>
                     <Item>
-                        <Item.Image size='tiny' circular src={host.image || '/assets/Images/user.png'} />
+                        <Item.Image size='tiny' circular src={host.image || '/assets/Images/user.png'} style={{ marginBottom: 3 }} />
                         <Item.Content>
                             <Item.Header as={Link} to={`/activities/${activity.id}`}>{activity.title}</Item.Header>
                             <Item.Description>
-                                Hosted by {host.displayName}
+                                Hosted by <Link to={`/profile/${host.userName}`}>{host.displayName}</Link>
                             </Item.Description>
                             {activity.isHost && (
                                 <Item.Description>
@@ -48,7 +47,7 @@ const ActivityListItem: React.FC<IProps> = ({ activity }) => {
                 </Item.Group>
             </Segment>
             <Segment>
-                <Icon name='clock' />{format(addHours(activity.date, 6), 'h:mm a')}
+                <Icon name='clock' />{format(activity.date, 'h:mm a')}
                 <Icon name='marker' />{activity.venue}, {activity.city}
             </Segment>
             <Segment secondary>

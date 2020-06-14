@@ -56,7 +56,7 @@ namespace Application.Activities
                     Title = request.Title,
                     Description = request.Description,
                     Category = request.Category,
-                    Date = request.Date,
+                    Date = request.Date.AddHours(6),
                     City = request.City,
                     Venue = request.Venue
                 };
