@@ -9,7 +9,7 @@ interface IProps {
 
 const ErrorMessage: React.FC<IProps> = ({ error, text }) => {
     return (
-        <Message error>
+        <Message negative>
             <Message.Header>{error.statusText}</Message.Header>
             {error.data && Object.keys(error.data.errors).length > 0 && (
                 <Message.List>

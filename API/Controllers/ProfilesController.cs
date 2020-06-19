@@ -20,5 +20,12 @@ namespace API.Controllers
         {
             return await _mediator.Send(new Details.Query { UserName = userName });
         }
+
+        [HttpPut("{userName}")]
+        public async Task<ActionResult<Unit>> Edit(string userName, Edit.Command command)
+        {
+            command.UserName = userName;
+            return await _mediator.Send(command);
+        }
     }
 }
