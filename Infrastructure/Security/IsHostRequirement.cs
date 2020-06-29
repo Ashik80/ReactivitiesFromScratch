@@ -26,7 +26,7 @@ namespace Infrastructure.Security
             IsHostRequirement requirement)
         {
             var currentUserName = httpContextAccessor.HttpContext.User?.Claims?
-                .FirstOrDefault(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                .FirstOrDefault(u => u.Type == ClaimTypes.NameIdentifier)?.Value;
 
             var activityId = Guid.Parse(httpContextAccessor.HttpContext.Request.RouteValues
                 .FirstOrDefault(a => a.Key == "id").Value.ToString());

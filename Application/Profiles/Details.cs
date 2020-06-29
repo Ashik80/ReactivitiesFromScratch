@@ -1,10 +1,6 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Domain;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Persistence;
 
 namespace Application.Profiles
 {
@@ -17,23 +13,14 @@ namespace Application.Profiles
 
         public class Handler : IRequestHandler<Query, Profile>
         {
-            private readonly UserManager<AppUser> userManager;
-            public Handler(DataContext context, UserManager<AppUser> userManager)
+            private readonly IProfileReader profileReader;
+            public Handler(IProfileReader profileReader)
             {
-                this.userManager = userManager;
+                this.profileReader = profileReader;
             }
             public async Task<Profile> Handle(Query request, CancellationToken cancellationToken)
             {
-                var user = await userManager.FindByNameAsync(request.UserName);
-
-                return new Profile
-                {
-                    DisplayName = user.DisplayName,
-                    UserName = user.UserName,
-                    Image = user.Photos.FirstOrDefault(u => u.IsMain)?.Url,
-                    Bio = user.Bio,
-                    Photos = user.Photos
-                };
+                return await profileReader.ReadProfile(request.UserName);
             }
         }
     }

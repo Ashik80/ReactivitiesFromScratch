@@ -73,7 +73,11 @@ const Profiles = {
     uploadPhoto: (photo: Blob): Promise<IPhoto> => requests.postForm('/photos', photo),
     setMainPhoto: (id: string) => requests.put(`/photos/setmain/${id}`, {}),
     deletePhoto: (id: string) => requests.del(`/photos/${id}`),
-    edit: (userName: string, profile: IProfile) => requests.put(`/profiles/${userName}`, profile)
+    edit: (userName: string, profile: IProfile) => requests.put(`/profiles/${userName}`, profile),
+    follow: (userName: string) => requests.post(`/profiles/follow/${userName}`, {}),
+    unfollow: (userName: string) =>  requests.del(`/profiles/follow/${userName}`),
+    listFollowings: (userName: string, predicate: string): Promise<IProfile[]> => 
+        requests.get(`/profiles/follow/${userName}?predicate=${predicate}`)
 }
 
 export default { Activities, User, Profiles }

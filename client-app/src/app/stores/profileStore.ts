@@ -1,5 +1,5 @@
 import { RootStore } from "./rootStore";
-import { observable, action, runInAction, computed } from "mobx";
+import { observable, action, runInAction, computed, reaction } from "mobx";
 import { IProfile, IPhoto } from '../models/profile'
 import agent from "../api/agent";
 import { toast } from "react-toastify";
@@ -8,12 +8,24 @@ export default class ProfileStore {
     rootStore: RootStore
     constructor(rootStore: RootStore) {
         this.rootStore = rootStore
+
+        reaction(() => this.activeTab,
+            activeTab => {
+                if(activeTab === 3 || activeTab === 4){
+                    const predicate = activeTab === 3 ? "followers" : "followings"
+                    this.loadFollowings(predicate)
+                }
+                else this.followings = []
+            }
+        )
     }
 
     @observable profile: IProfile | null = null
     @observable loadingProfile = false
     @observable uploadingPhoto = false
     @observable loading = false
+    @observable followings: IProfile[] = []
+    @observable activeTab: number = 0
 
     @computed get isCurrentUser() {
         if (this.profile && this.rootStore.userStore.user) {
@@ -22,6 +34,10 @@ export default class ProfileStore {
         else {
             return false
         }
+    }
+
+    @action setActiveTab = (activeIndex: number) => {
+        this.activeTab = activeIndex
     }
 
     @action loadProfile = async (userName: string) => {
@@ -90,16 +106,16 @@ export default class ProfileStore {
 
     @action deletePhoto = async (photo: IPhoto) => {
         this.loading = true
-        try{
+        try {
             await agent.Profiles.deletePhoto(photo.id)
             runInAction(() => {
-                if(this.profile){
+                if (this.profile) {
                     this.profile.photos = this.profile.photos.filter(p => p.id !== photo.id)
                     this.loading = false
                 }
             })
         }
-        catch(error){
+        catch (error) {
             console.log(error)
             toast.error("Problem deleting photo")
             runInAction(() => {
@@ -110,10 +126,10 @@ export default class ProfileStore {
 
     @action editProfile = async (profile: IProfile) => {
         this.loading = true
-        try{
+        try {
             await agent.Profiles.edit(this.rootStore.userStore.user!.userName, profile)
             runInAction(() => {
-                if(this.profile && this.rootStore.userStore.user){
+                if (this.profile && this.rootStore.userStore.user) {
                     this.profile.displayName = profile.displayName
                     this.rootStore.userStore.user.displayName = profile.displayName
                     this.profile.bio = profile.bio
@@ -121,9 +137,65 @@ export default class ProfileStore {
                 }
             })
         }
-        catch(error){
+        catch (error) {
             console.log(error)
             toast.error("Problem updating profile")
+            runInAction(() => {
+                this.loading = false
+            })
+        }
+    }
+
+    @action follow = async (userName: string) => {
+        this.loading = true
+        try {
+            await agent.Profiles.follow(userName)
+            runInAction(() => {
+                if (this.profile) {
+                    this.profile.following = true
+                    this.profile.followersCount++
+                }
+            })
+        } catch (error) {
+            toast.error("Problem following user")
+            console.log(error)
+        } finally {
+            runInAction(() => {
+                this.loading = false
+            })
+        }
+    }
+
+    @action unfollow = async (userName: string) => {
+        this.loading = true
+        try {
+            await agent.Profiles.unfollow(userName)
+            runInAction(() => {
+                if (this.profile) {
+                    this.profile.following = false
+                    this.profile.followersCount--
+                }
+            })
+        } catch (error) {
+            toast.error("Problem unfollowing user")
+            console.log(error)
+        } finally {
+            runInAction(() => {
+                this.loading = false
+            })
+        }
+    }
+
+    @action loadFollowings = async (predicate: string) => {
+        this.loading = true
+        try {
+            const profiles = await agent.Profiles.listFollowings(this.profile!.userName, predicate)
+            runInAction(() => {
+                this.followings = profiles
+            })
+        } catch (error) {
+            toast.error("Problem loading followers")
+        } finally {
             runInAction(() => {
                 this.loading = false
             })
