@@ -1,9 +1,9 @@
 import axios, { AxiosResponse } from 'axios'
-import { IActivity } from '../models/activity'
+import { IActivity, IActivitiesEnvelope } from '../models/activity'
 import { history } from '../..'
 import { toast } from 'react-toastify'
 import { IUser, IUserFormValues } from '../models/user'
-import { IProfile, IPhoto } from '../models/profile'
+import { IProfile, IPhoto, IUserActivity } from '../models/profile'
 
 axios.defaults.baseURL = "http://localhost:5000/api"
 
@@ -53,7 +53,8 @@ const requests = {
 }
 
 const Activities = {
-    list: (): Promise<IActivity[]> => requests.get("/activity"),
+    list: (params: URLSearchParams): Promise<IActivitiesEnvelope> => 
+        axios.get('/activity', {params: params}).then(sleep(1000)).then(responseBody),
     details: (id: string): Promise<IActivity> => requests.get(`/activity/${id}`),
     create: (activity: IActivity) => requests.post('/activity', activity),
     update: (activity: IActivity) => requests.put(`/activity/${activity.id}`, activity),
@@ -77,7 +78,9 @@ const Profiles = {
     follow: (userName: string) => requests.post(`/profiles/follow/${userName}`, {}),
     unfollow: (userName: string) =>  requests.del(`/profiles/follow/${userName}`),
     listFollowings: (userName: string, predicate: string): Promise<IProfile[]> => 
-        requests.get(`/profiles/follow/${userName}?predicate=${predicate}`)
+        requests.get(`/profiles/follow/${userName}?predicate=${predicate}`),
+    listActivities: (userName: string, predicate?: string): Promise<IUserActivity[]> => 
+        requests.get(`/profiles/activities/${userName}?predicate=${predicate}`)
 }
 
 export default { Activities, User, Profiles }
